@@ -1,0 +1,22 @@
+.title-bar {
+    padding-left: 10px;
+    background-color: orangered;
+    padding-bottom: 10px;
+}
+.nav-item {
+    color: white;
+    border: black;
+    padding-right: 10px;
+    padding-left: 10px;
+    border-style: solid;
+    text-align: center;
+    background-color: maroon;
+    
+    &:hover {
+    color: #5aadbb;
+  }
+}
+h1 {
+    font-weight: bolder;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
