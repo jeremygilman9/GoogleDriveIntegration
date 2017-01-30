@@ -5,8 +5,9 @@ import './index.scss';
 
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { AppModule } from './app/app.module';
+import { GoogleAPI } from './app/gloader';
 
-platformBrowserDynamic().bootstrapModule(AppModule);
+platformBrowserDynamic().bootstrapModule(AppModule, [GoogleAPI]);
 
 
 
