@@ -3,8 +3,18 @@
 </p>
 
 <div id='result'>
-  
+
 </div>
 <button (click)="googleLogin($event)">Google Login</button>
 <button (click)="googleLogout($event)">Google Logout</button>
 <button (click)="loadPicker()">Picker</button>
+<button (click)="getFiles()">Get Files</button>
+<button (click)="clearFiles()">Clear Files</button>
+<button (click)="addFile()">Add File</button>
+<ul>
+  <li>This is First Element</li>
+  <li *ngFor="let item of files">
+    {{item.name }}
+  </li>
+  <li>This is the Last Element</li>
+</ul>

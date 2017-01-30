@@ -84,6 +84,16 @@ export class GoogleAPI {
     //console.log('Picker Is: ', picker);
   }
 
+  getDriveFiles() : any {
+    return this.gapi.client.drive.files.list({
+      'pageSize': 10
+    }).then(function (response) {
+      var files = response.result.files;
+      console.log('Files: ', files);
+      return files;
+    });
+  }
+
   createPicker() : any {
      return  new this.gapi.picker.PickerBuilder().
               addView(this.gapi.picker.ViewId.PHOTOS).

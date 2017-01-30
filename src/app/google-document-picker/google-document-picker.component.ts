@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { GoogleAPI } from '../gloader';
 
 @Component({
@@ -10,9 +10,12 @@ import { GoogleAPI } from '../gloader';
 export class GoogleDocumentPickerComponent implements OnInit {
   gapi: any;
   google: any;
+  files: any[];
+  changeRef: any;
 
-  constructor(google: GoogleAPI) {
+  constructor(google: GoogleAPI, ref: ChangeDetectorRef) {
     this.google = google;
+    this.changeRef = ref;
   }
 
   ngOnInit() {
@@ -24,16 +27,34 @@ export class GoogleDocumentPickerComponent implements OnInit {
 
   initClient() { }
 
-  googleLogin(event){
+  googleLogin(event) {
     this.google.handleSignIn();
   }
 
-  googleLogout(event){
+  googleLogout(event) {
     this.google.handleSignOut();
   }
 
-  loadPicker(){
+  loadPicker() {
     console.log('Clicked the picker button');
     var picker = this.google.loadPickerApi();
+  }
+
+  getFiles() {
+    console.log("Getting the requested Files...");
+    //this.files = Array<any>();
+    this.google.getDriveFiles().then(values => {
+      this.files = values;
+      console.log('Files in Picker Component: ', this.files);
+      // manually manage the change detection until more can be read about observables and promises
+      this.changeRef.detectChanges();
+    });    
+  }
+  addFile(){
+    this.files.push({'name':'Happy'});
+  }
+
+  clearFiles() {
+    this.files = null;
   }
 }
