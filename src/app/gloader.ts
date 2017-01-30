@@ -103,5 +103,16 @@ export class GoogleAPI {
               build().
               setVisible(true);
   }
+
+  getFile(file) : any {
+    console.log("Attempting TO Download: ", file.name);
+    return this.gapi.client.drive.files.export({
+      fileId: file.id,
+      mimeType: 'application/pdf'
+    }).then((resp) => {
+      console.log("Finished Downloading File", resp);
+      return resp;
+    });
+  }
 }
 

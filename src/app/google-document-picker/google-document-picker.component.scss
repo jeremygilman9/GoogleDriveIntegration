@@ -1,0 +1,26 @@
+.file-table-wrapper {    
+    padding: 20px;
+}
+.file-table {
+    border: solid;
+    padding: 10px;
+    margin: 0;
+}
+.column-head {
+    padding-left: 10px;
+    padding-right: 10px;
+    border: solid;
+    border-collapse: collapse;
+}
+.file-table-row {    
+    padding-left: 10px;
+    padding-right: 10px;
+    text-align: center;
+    border: solid;
+}
+.file-table-row:nth-child(odd) {
+    background: lightgray;
+}
+.charge-code-cell {
+    color: blueviolet;
+}

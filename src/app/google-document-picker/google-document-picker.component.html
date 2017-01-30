@@ -11,10 +11,20 @@
 <button (click)="getFiles()">Get Files</button>
 <button (click)="clearFiles()">Clear Files</button>
 <button (click)="addFile()">Add File</button>
-<ul>
-  <li>This is First Element</li>
-  <li *ngFor="let item of files">
-    {{item.name }}
-  </li>
-  <li>This is the Last Element</li>
-</ul>
+
+<div class='file-table-wrapper'>
+<table class="file-table">
+  <thead>
+    <th class="column-head">Type</th>
+    <th class="column-head">Name</th>
+    <th class="column-head"></th>
+    <th class="column-head"></th>
+  </thead>
+  <tbody>
+    <tr class="file-table-row" *ngFor="let item of files">
+      <td>{{ item.mimeType }}</td>
+      <td><a (click)=fileClick(item)>{{ item.name }}</a></td>
+    </tr>
+  </tbody>
+</table>
+</div>

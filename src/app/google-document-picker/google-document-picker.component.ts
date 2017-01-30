@@ -12,6 +12,7 @@ export class GoogleDocumentPickerComponent implements OnInit {
   google: any;
   files: any[];
   changeRef: any;
+  compRef = this;
 
   constructor(google: GoogleAPI, ref: ChangeDetectorRef) {
     this.google = google;
@@ -23,6 +24,7 @@ export class GoogleDocumentPickerComponent implements OnInit {
       this.gapi = value;
       console.log('(GoogleDocumentPickerComponent) GAPI is: ', this.gapi);
     });
+    setTimeout(() => this.getFiles(), 2000);
   }
 
   initClient() { }
@@ -56,5 +58,10 @@ export class GoogleDocumentPickerComponent implements OnInit {
 
   clearFiles() {
     this.files = null;
+  }
+
+  fileClick(file){
+    console.log('Clicked on file: ', file.name);
+    var file = this.google.getFile(file);
   }
 }
