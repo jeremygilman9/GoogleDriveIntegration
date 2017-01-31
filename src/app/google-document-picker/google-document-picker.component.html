@@ -8,23 +8,34 @@
 <button (click)="googleLogin($event)">Google Login</button>
 <button (click)="googleLogout($event)">Google Logout</button>
 <button (click)="loadPicker()">Picker</button>
-<button (click)="getFiles()">Get Files</button>
+<button (click)="getFiles()">Refresh Files</button>
 <button (click)="clearFiles()">Clear Files</button>
-<button (click)="addFile()">Add File</button>
+<button (click)="addFile()">Add Happy File</button>
+
+<div style='padding-top:10px;float: right'>
+  <button [ngClass]="{disabled : currentPage == 0}" (click)='pagePrevious()'>Previous</button>
+  Page {{currentPage+1}} of {{ totalPages }}
+  <button (click)='pageNext()'>Next</button>
+</div>
 
 <div class='file-table-wrapper'>
 <table class="file-table">
   <thead>
     <th class="column-head">Type</th>
     <th class="column-head">Name</th>
-    <th class="column-head"></th>
-    <th class="column-head"></th>
+    <th class="column-head">Download</th>
+    <th class="column-head">Clicked</th>
   </thead>
   <tbody>
     <tr class="file-table-row" *ngFor="let item of files">
       <td>{{ item.mimeType }}</td>
       <td><a (click)=fileClick(item)>{{ item.name }}</a></td>
+      <td><a (click)=fileDownload(item)>Download</a></td>
     </tr>
   </tbody>
 </table>
+</div>
+
+<div>
+  <img [src]="image">
 </div>

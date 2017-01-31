@@ -1,13 +1,27 @@
+
+import { Component } from '@angular/core';
+import 'rxjs/add/operator/map';
+import * as FileSaver from 'file-saver';
+import { Http, ResponseContentType } from '@angular/http';
+
+
 const url = 'https://apis.google.com/js/client.js?onload=__onGoogleLoaded';
-const apiKey = 'AIzaSyBGXV555MnPGV-5yPYtOionURsMDOUIxkk';
-const clientId = '960608004235-i2gdd1ais91bd5tb26p20gr6t95oo450.apps.googleusercontent.com';
+const apiKey = 'AIzaSyAHCWQHaQjajwP83Myql1IbeXfnR49zJLo';
+const clientId = '846160280996-pm27f34v86audcj728vi7si8tqs22lcg.apps.googleusercontent.com';
+var isLoggedIn: boolean;
+var oAuthToken: any;
 
-
+@Component({
+  providers: [Http] 
+})
 export class GoogleAPI {
   loadAPI: Promise<any>;
   gapi: any;
   loggedIn: boolean;
-  constructor() {
+  google:any;
+  http: Http;
+
+  constructor(http: Http) {
     console.log('inside the GoogleAPI Constructor');
     this.loadAPI = new Promise((resolve) => {
       window['__onGoogleLoaded'] = (ev) => {
@@ -16,6 +30,7 @@ export class GoogleAPI {
       }
       this.loadScript();
     });
+    this.http = http;
   }
   loadScript() {
     console.log('loading..')
@@ -44,7 +59,7 @@ export class GoogleAPI {
         scope: 'https://www.googleapis.com/auth/drive'
       }).then(function() {
         console.log('Loaded OAuth2 Successfully', gapi.auth2.getAuthInstance());
-
+        
         // Listen for sign-in state changes.
         gapi.auth2.getAuthInstance().isSignedIn.listen(gLoaderRef.updateSigninStatus);
 
@@ -56,10 +71,13 @@ export class GoogleAPI {
 
   updateSigninStatus (isSignedIn) {
     if (isSignedIn) {
-      console.log('Signed In');
+      isLoggedIn = true;
+      oAuthToken = this.gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;      
+      console.log('Just Signed In, OAuth Token: ');//, oAuthToken);
     }
     else {
-      console.log('Logged Out');
+      isLoggedIn = false;
+      console.log('Just Logged Out');
     }
   }
 
@@ -74,24 +92,35 @@ export class GoogleAPI {
   loadPickerApi() {
     var gapi = this.gapi;
     var gLoaderRef = this;
-    console.log('Inside the loadPickerApi() function: ', gapi);
     gLoaderRef.gapi.load('picker', {'callback':gLoaderRef.onPickerApiLoaded(gapi)});
   }
 
   onPickerApiLoaded(gapi: any) {
-    console.log('Picker Api Loaded', gapi.client);
-    //var picker = new gapi.client.picker.PickerBuilder();
+    console.log('Picker Api Loaded - Inside Callback', gapi);
+    //var picker = new google.picker.PickerBuilder();
     //console.log('Picker Is: ', picker);
   }
 
-  getDriveFiles() : any {
+  getDriveFiles(page: string = '') : any {
+    if (!this.checkIsLoggedIn()) {return new Array<Object>();}
     return this.gapi.client.drive.files.list({
-      'pageSize': 10
+      'pageSize': 10,
+      'pageToken': page,
+      'fields': 'files(id, name, webContentLink, webViewLink)'
     }).then(function (response) {
+      console.log('Fulle Response from Files: ', response);
       var files = response.result.files;
       console.log('Files: ', files);
-      return files;
+      return response.result;
     });
+  }
+
+  checkIsLoggedIn()  : boolean {
+    console.log('isLoggedIn is: ', isLoggedIn);
+    if (isLoggedIn)
+      return true;
+    else
+      return false;
   }
 
   createPicker() : any {
@@ -106,13 +135,56 @@ export class GoogleAPI {
 
   getFile(file) : any {
     console.log("Attempting TO Download: ", file.name);
-    return this.gapi.client.drive.files.export({
+    var request = this.gapi.client.drive.files.get({
       fileId: file.id,
-      mimeType: 'application/pdf'
-    }).then((resp) => {
-      console.log("Finished Downloading File", resp);
-      return resp;
+      alt: 'media'
     });
+    var resp2 = request.execute(resp => {
+      console.log('REsponse: ', resp);
+    });
+    console.log('Resp2: ', resp2);
+
+    console.log('Request: ', request);
+    return request.then(function(resp){
+      console.log('Response: ', resp);
+      var blob: Blob = new Blob([resp.body], {type: resp.headers['Content-Type']});
+      FileSaver.saveAs(blob, 'temp');
+      return blob;
+    });
+
+    // map(resp => {
+    //    console.log("Finished Downloading File", resp);
+    //    var blob = new Blob([resp.blob()], {type: resp.headers['Content-Type']});
+    //   console.log("Finished Creating Blob");      
+    //    return blob; // may want to return the blob instead here
+    //  });
   }
+
+  getFileFromUrl(file: any) : any {
+    // var req2 = this.gapi.client.request({
+    //   'path': '',
+    //   'headers': '',
+    //   'method': 'GET'
+    // });
+    var request = this.http.get("https://www.googleapis.com/drive/v3/files/"+file.id+'?alt=media', { responseType: ResponseContentType.Blob })
+    .map(data => data.json())
+    .subscribe((response) => {
+      console.log('Val: ', response);
+      var blob = new Blob([response.blob()], {type: file.type});
+      console.log('Blob is: ', blob);
+      return blob;
+    });
+    console.log('Request: ',request);
+    
+  }
+
+  // gapi.client.request({
+  //       'path': '/upload/drive/v2/files/'+folderId+"?fileId="+fileId+"&uploadType=multipart",
+  //       'method': 'PUT',
+  //       'params': {'fileId': fileId, 'uploadType': 'multipart'},
+  //       'headers': {'Content-Type': 'multipart/mixed; boundary="' + boundary + '"'},
+  //       'body': multipartRequestBody,
+  //       callback:callback,
+  //   });
 }
 

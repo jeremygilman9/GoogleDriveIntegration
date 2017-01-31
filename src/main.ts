@@ -1,5 +1,6 @@
 import 'core-js/client/shim';
 import 'zone.js/dist/zone';
+import 'rxjs/add/operator/map';
 
 import './index.scss';
 
