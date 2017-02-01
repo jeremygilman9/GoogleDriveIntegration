@@ -1,0 +1,36 @@
+<p>
+  google-translate-page works!
+</p>
+<div calss="select-wrapper">
+<div class="translate-from-list-container">
+Translate From: 
+<select>
+<option [value]="l" *ngFor="let l of langFromList" >
+  {{ l.fullName }}
+</option>
+</select>
+</div>
+<div class="translate-to-list-container">
+Translate To: 
+<select>
+<option [value]="l" *ngFor="let l of langToList" >
+  {{ l.fullName }}
+</option>
+</select>
+</div>
+</div>
+<!--
+<div>
+<input type="text" [(ngModel)]="textIn" class="input-box"/>
+<input type="text" [(ngModel)]="textOut" class="input-box" />
+</div>
+-->
+<div class="button-container">
+  <button class="translate-button" ng-click="translate()">Translate</button>
+</div>
+
+*<ul>
+  <li *ngFor="let item of translations">
+    {{item}}
+  </li>
+</ul>

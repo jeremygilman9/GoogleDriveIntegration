@@ -2,7 +2,11 @@
 import { Component } from '@angular/core';
 import 'rxjs/add/operator/map';
 import * as FileSaver from 'file-saver';
-import { Http, ResponseContentType } from '@angular/http';
+//import * as Translate from 'google-translate';
+//import Stream from 'ts-stream';
+//var Stream = require("ts-stream");//.Stream;
+import { Http, ResponseContentType, Headers } from '@angular/http';
+
 
 
 const url = 'https://apis.google.com/js/client.js?onload=__onGoogleLoaded';
@@ -10,6 +14,11 @@ const apiKey = 'AIzaSyAHCWQHaQjajwP83Myql1IbeXfnR49zJLo';
 const clientId = '846160280996-pm27f34v86audcj728vi7si8tqs22lcg.apps.googleusercontent.com';
 var isLoggedIn: boolean;
 var oAuthToken: any;
+const ProjectId = 'canvas-cursor-157300';
+// const translateClient = Translate({
+//       projectId: ProjectId,
+//       key: apiKey
+//     });
 
 @Component({
   providers: [Http] 
@@ -71,9 +80,8 @@ export class GoogleAPI {
 
   updateSigninStatus (isSignedIn) {
     if (isSignedIn) {
-      isLoggedIn = true;
-      oAuthToken = this.gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;      
-      console.log('Just Signed In, OAuth Token: ');//, oAuthToken);
+      isLoggedIn = true;    
+      console.log('Just Signed In');
     }
     else {
       isLoggedIn = false;
@@ -82,7 +90,10 @@ export class GoogleAPI {
   }
 
   handleSignIn(){
-    this.gapi.auth2.getAuthInstance().signIn();
+    this.gapi.auth2.getAuthInstance().signIn().then(() =>{
+      oAuthToken = this.gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
+      console.log('Just Signed In, OAuth Token2: ', oAuthToken);
+    });
   }
   
   handleSignOut(){
@@ -105,8 +116,7 @@ export class GoogleAPI {
     if (!this.checkIsLoggedIn()) {return new Array<Object>();}
     return this.gapi.client.drive.files.list({
       'pageSize': 10,
-      'pageToken': page,
-      'fields': 'files(id, name, webContentLink, webViewLink)'
+      'pageToken': page
     }).then(function (response) {
       console.log('Fulle Response from Files: ', response);
       var files = response.result.files;
@@ -134,43 +144,42 @@ export class GoogleAPI {
   }
 
   getFile(file) : any {
-    console.log("Attempting TO Download: ", file.name);
+    console.log("Attempting TO Download: ", file);
     var request = this.gapi.client.drive.files.get({
       fileId: file.id,
       alt: 'media'
     });
-    var resp2 = request.execute(resp => {
-      console.log('REsponse: ', resp);
+    if (file.mimeType == "application/vnd.google-apps.document")
+    {
+      request = this.gapi.client.drive.files.export({
+      fileId: file.id,
+      mimeType: 'text/plain'
     });
-    console.log('Resp2: ', resp2);
-
-    console.log('Request: ', request);
+    }
     return request.then(function(resp){
       console.log('Response: ', resp);
+      //var stream = Stream.createReadStream(resp.body);
+      //  st.from(resp.body).result().then(data => {
+      //    console.log("The Data is: ", data);        
+      //    var file2: File = new File([resp.body], 'Temp1');
+      //    console.log("File2 FRom Read Stream: ", file2);
+      //  });
+      var file: File = new File([resp.body], 'Temp1');
       var blob: Blob = new Blob([resp.body], {type: resp.headers['Content-Type']});
-      FileSaver.saveAs(blob, 'temp');
       return blob;
     });
-
-    // map(resp => {
-    //    console.log("Finished Downloading File", resp);
-    //    var blob = new Blob([resp.blob()], {type: resp.headers['Content-Type']});
-    //   console.log("Finished Creating Blob");      
-    //    return blob; // may want to return the blob instead here
-    //  });
   }
 
   getFileFromUrl(file: any) : any {
-    // var req2 = this.gapi.client.request({
-    //   'path': '',
-    //   'headers': '',
-    //   'method': 'GET'
-    // });
-    var request = this.http.get("https://www.googleapis.com/drive/v3/files/"+file.id+'?alt=media', { responseType: ResponseContentType.Blob })
+    
+    let headers = new Headers({ 'Accept': 'application/json' });
+    headers.append('Authorization', `Bearer ${oAuthToken}`);
+    console.log('HEaders: ', headers);
+    var request = this.http.get("https://www.googleapis.com/drive/v3/files/"+file.id+'?alt=media', { responseType: ResponseContentType.Blob, headers: headers })
     .map(data => data.json())
     .subscribe((response) => {
       console.log('Val: ', response);
-      var blob = new Blob([response.blob()], {type: file.type});
+      var blob = new Blob([response.blob()], {type: 'application/pdf'});
       console.log('Blob is: ', blob);
       return blob;
     });
@@ -178,13 +187,14 @@ export class GoogleAPI {
     
   }
 
-  // gapi.client.request({
-  //       'path': '/upload/drive/v2/files/'+folderId+"?fileId="+fileId+"&uploadType=multipart",
-  //       'method': 'PUT',
-  //       'params': {'fileId': fileId, 'uploadType': 'multipart'},
-  //       'headers': {'Content-Type': 'multipart/mixed; boundary="' + boundary + '"'},
-  //       'body': multipartRequestBody,
-  //       callback:callback,
-  //   });
+
+//* TRANSLATE SECTION */
+// translate(textIn: string, langTo: any, langFrom: any) : any {
+//   return translateClient.translate(textIn, langTo.shortName)
+//     .then((results) => {
+//       var translation = results[0];
+//       return translation;
+//     });
+// }
 }
 

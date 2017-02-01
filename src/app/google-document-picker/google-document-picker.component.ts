@@ -97,14 +97,10 @@ export class GoogleDocumentPickerComponent implements OnInit {
 
   fileDownload(fileToDownload){
     console.log('File To Download: ', fileToDownload.name);
-    this.google.getFileFromUrl(fileToDownload).then(value => {
-      console.log("Blob is: ", value);
-
-      var file2 = new File([value], fileToDownload.name, {type: value.type});
-      console.log('File is: ', file2);
-      //FileSaver.saveAs(value, fileToDownload.name);
-      FileSaver.saveAs(file2);
-      console.log('saved blob');
+    var value = this.google.getFile(fileToDownload).then(value => {
+      console.log("Value From gLoader is: ", value);
+      FileSaver.saveAs(value, fileToDownload.name);
+      console.log('Saved Value as file');
       // manually manage the change detection until more can be read about observables and promises
       this.changeRef.detectChanges();
     });
@@ -127,4 +123,5 @@ export class GoogleDocumentPickerComponent implements OnInit {
       this.getFiles(pages[currentPage]);
     }
   }
+
 }
